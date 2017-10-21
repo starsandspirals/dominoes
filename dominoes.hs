@@ -36,4 +36,15 @@ module Dominoes where
     | otherwise = playedP (f,s) t
 
 
+  possPlays :: Hand -> Board -> ( [Domino],[Domino] )
+  possPlays [] _ = ( [],[] )
+  possPlays h [] = ( h,h )
+  
+  possPlays (h:t) board
+    | goesP h L board && goesP h R board = (h:l, h:r)
+    | goesP h L board = (h:l, r)
+    | goesP h R board = (l, h:r)
+    where (l,r) = possPlays t board
+
+
 
