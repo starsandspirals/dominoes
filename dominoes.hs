@@ -46,5 +46,19 @@ module Dominoes where
     | goesP h R board = (l, h:r)
     where (l,r) = possPlays t board
 
+  
+  playDom :: Domino -> Board -> End -> Maybe Board
+  playDom d [] _ = Just [d]
+
+  playDom d board L
+    | goesP d L board = Just (d:board)
+    | otherwise = Nothing
+
+  playDom d (a:b) R
+    | goesP d R (a:b) = playDom d b R
+    | otherwise = Nothing
+
+
+
 
 
