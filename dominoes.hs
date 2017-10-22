@@ -18,37 +18,62 @@ module Dominoes where
                  (6,0),(6,1),(6,2),(6,3),(6,4),(6,5),(6,6)]
 
   
+  {- goesP checks if a given domino can be played at a given
+     end of a given board, in either orientation. -}
   goesP :: Domino -> End -> Board -> Bool
   goesP _ _ [] = True
   
+  {- If either of the domino's sides matches the left side of
+   the first domino on the board, then it can be played on
+   the left. -}
   goesP (f,s) L ( (f1,s1):_ ) = f==f1 || s==f1
 
+  {- If there is one domino on the board, then the right case
+     is similar to the left case. Otherwise, we check the tail
+     until only one domino remains. -}
   goesP (f,s) R [(f1,s1)] = f==s1 || s==s1
   goesP (f,s) R ( _:t ) = goesP (f,s) R t
   
 
+  {- knockingP returns true if a given hand contains no dominoes
+     that can be played on a given board. -}
   knockingP :: Hand -> Board -> Bool
   knockingP [] _ = True
   knockingP _ [] = False
   
+  {- We check the first domino to see if it can be played, and if
+     it cannot we continue checking the rest of the dominoes in
+     the hand. -}
   knockingP ( h:t ) b 
    | goesP h L b || goesP h R b = False
    | otherwise = knockingP t b
 
 
+  {- playedP returns true if a given domino has already been played
+     on a given board, in either orientation. -}
   playedP :: Domino -> Board -> Bool
   playedP _ [] = False
 
+  {- We check the first domino on the board to see if it matches the
+     given domino, and if not we continue checking the rest of the
+     board. -}
   playedP (f,s) ( (f1,s1):t )
     | f==f1 && s==s1 = True
     | f==s1 && s==f1 = True
     | otherwise = playedP (f,s) t
 
 
+  {- possPlays returns two lists, containing the dominoes in a given
+     hand that can be played at the left end and the right end of a 
+     given board. -}
   possPlays :: Hand -> Board -> ( [Domino],[Domino] )
   possPlays [] _ = ( [],[] )
   possPlays h [] = ( h,h )
   
+  {- We check the first domino in the hand, and add it to the lists
+     depending on which ends it can be played at. We then join this
+     to a recursive call of possPlays, to check all other dominoes
+     in the hand in a similar way. -}
   possPlays (h:t) board
     | goesP h L board && goesP h R board = (h:l, h:r)
     | goesP h L board = (h:l, r)
@@ -56,15 +81,24 @@ module Dominoes where
     where (l,r) = possPlays t board
 
   
+  {- playDom plays a given domino onto a given end of a given board
+     if possible, in the correct orientation, and returns Nothing if
+     this is not possible. -}
   playDom :: Domino -> Board -> End -> Maybe Board
   playDom d [] _ = Just [d]
 
+  {- On the left, we just join the domino to the head of the board in
+     the orientation it can be played. -}
   playDom (f,s) board L
     | goesP (f,s) L board && s==f1 = Just ((f,s):board)
     | goesP (s,f) L board && f==f1 = Just ((s,f):board)
     | otherwise = Nothing
     where (f1,s1):t = board
 
+  {- The right is more complicated; if there is one domino on the board,
+     we can join the domino to the end similarly, but if there are more,
+     we join the rest recursively to the beginning until we get to this
+     case, returning Nothing again if the domino cannot be played. -}
   playDom (f,s) [d] R
     | goesP (f,s) R [d] && f==s1 = Just [d,(f,s)]
     | goesP (s,f) R [d] && s==s1 = Just [d,(s,f)]
@@ -77,6 +111,7 @@ module Dominoes where
     where recur = playDom (f,s) b R
  
 
+  -- Functions for working with Maybes taken from the notes.
   isJust :: (Maybe a) -> Bool
   isJust (Just _) = True
   isJust Nothing = False
@@ -86,15 +121,25 @@ module Dominoes where
   resMaybe (Just x) = x
 
   
+  {- scoreBoard calculates the 5s-and-3s score for a given board. This
+     means finding the sum of the two open ends of the board and then
+     working out how many 3s or 5s goes into this total, with double
+     the points being granted for a double domino. -}
   scoreBoard :: Board -> Int
   scoreBoard [] = 0
 
+  {- One domino needs to be worked out as a special case, as we do not
+     want to count it twice if it happens to be a double. -}
   scoreBoard [(f1,s1)]
     | score `mod` 3 == 0 = score `div` 3
     | score `mod` 5 == 0 = score `div` 5
     | otherwise = 0
     where score = f1+s1
 
+  {- All cases can be reduced to the case where there are two dominoes,
+     as only the first and last domino are relevant for scoring. We can
+     calculate the required score from these two dominoes, adjusting for
+     either of them being doubles. -}
   scoreBoard [(f1,f2),(s1,s2)]
     | score `mod` 3 == 0 && score `mod` 5 == 0 = score `div` 3 + score `div` 5
     | score `mod` 3 == 0 = score `div` 3
@@ -109,13 +154,23 @@ module Dominoes where
   scoreBoard b = scoreBoard [head b, last b]
 
 
+  {- scoreN takes a board and an integer and returns a list of dominoes
+     that could be played to give the required score. We pass this on
+     to an auxiliary function so that a list of all dominoes can be used. -}
   scoreN :: Board -> Int -> [ (Domino,End) ]
   
   scoreN b i = scoreNA b i allDominoes
 
   
+  {- scoreNA is our auxiliary function that creates the list required by
+     scoreN. -}
   scoreNA :: Board -> Int -> [Domino] -> [ (Domino, End) ]
  
+  {- We recursively check through the list of all possible dominoes. For
+     each possibility, check whether it can be played at each end of the
+     board, and if it can, whether it gives the required score. If both
+     of these are true, the domino is included in the list returned by
+     the function, as well as the end it can be played at. -}
   scoreNA b i [d]
     | goesP d L b && goesP d R b && scoreL == i && scoreR == i = [ (d,L),(d,R) ]
     | goesP d L b && scoreL == i = [ (d,L) ]
