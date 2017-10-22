@@ -8,6 +8,13 @@ module Dominoes where
 
   data End = L | R
 
+  allDominoes = [(0,0),
+                 (1,0),(1,1),
+                 (2,0),(2,1),(2,2),
+                 (3,0),(3,1),(3,2),(3,3),
+                 (4,0),(4,1),(4,2),(4,3),(4,4),
+                 (5,0),(5,1),(5,2),(5,3),(5,4),(5,5),
+                 (6,0),(6,1),(6,2),(6,3),(6,4),(6,5),(6,6)]
   
   goesP :: Domino -> End -> Board -> Bool
   goesP _ _ [] = True
@@ -58,6 +65,10 @@ module Dominoes where
     | goesP d R (a:b) = playDom d b R
     | otherwise = Nothing
 
+ 
+  resMaybe :: (Maybe a) -> a 
+  resMaybe (Just x) = x
+
   
   scoreBoard :: Board -> Int
   scoreBoard [] = 0
@@ -76,6 +87,24 @@ module Dominoes where
     where score = f1+s2
 
   scoreBoard b = scoreBoard [head b, last b]
+
+
+  scoreN :: Board -> Int -> [ (Domino,End) ]
+  
+  scoreN b i = scoreNA b i allDominoes
+
+  
+  scoreNA :: Board -> Int -> [Domino] -> [ (Domino, End) ]
+ 
+  scoreNA b i [d]
+    | goesP d L b && goesP d R b && scoreL == i && scoreR == i = [ (d,L),(d,R) ]
+    | goesP d L b && scoreL == i = [ (d,L) ]
+    | goesP d R b && scoreR == i = [ (d,R) ]
+    | otherwise = []
+    where scoreL = scoreBoard (resMaybe (playDom d b L))
+          scoreR = scoreBoard (resMaybe (playDom d b R))
+
+  scoreNA b i (h:t) = scoreNA b i [h] ++ scoreNA b i t
 
 
     
