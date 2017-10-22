@@ -7,6 +7,7 @@ module Dominoes where
   type Board = [Domino]
 
   data End = L | R
+             deriving (Show)
 
   allDominoes = [(0,0),
                  (1,0),(1,1),
@@ -15,6 +16,7 @@ module Dominoes where
                  (4,0),(4,1),(4,2),(4,3),(4,4),
                  (5,0),(5,1),(5,2),(5,3),(5,4),(5,5),
                  (6,0),(6,1),(6,2),(6,3),(6,4),(6,5),(6,6)]
+
   
   goesP :: Domino -> End -> Board -> Bool
   goesP _ _ [] = True
@@ -57,15 +59,29 @@ module Dominoes where
   playDom :: Domino -> Board -> End -> Maybe Board
   playDom d [] _ = Just [d]
 
-  playDom d board L
-    | goesP d L board = Just (d:board)
+  playDom (f,s) board L
+    | goesP (f,s) L board && s==f1 = Just ((f,s):board)
+    | goesP (s,f) L board && f==f1 = Just ((s,f):board)
     | otherwise = Nothing
+    where (f1,s1):t = board
 
-  playDom d (a:b) R
-    | goesP d R (a:b) = playDom d b R
+  playDom (f,s) [d] R
+    | goesP (f,s) R [d] && f==s1 = Just [d,(f,s)]
+    | goesP (s,f) R [d] && s==s1 = Just [d,(s,f)]
     | otherwise = Nothing
+    where (f1,s1) = d
 
+  playDom (f,s) (a:b) R
+    | isJust recur = Just (a:resMaybe recur)
+    | otherwise = Nothing
+    where recur = playDom (f,s) b R
  
+
+  isJust :: (Maybe a) -> Bool
+  isJust (Just _) = True
+  isJust Nothing = False
+
+
   resMaybe :: (Maybe a) -> a 
   resMaybe (Just x) = x
 
@@ -79,12 +95,16 @@ module Dominoes where
     | otherwise = 0
     where score = f1+s1
 
-  scoreBoard [(f1,_),(_,s2)]
+  scoreBoard [(f1,f2),(s1,s2)]
     | score `mod` 3 == 0 && score `mod` 5 == 0 = score `div` 3 + score `div` 5
     | score `mod` 3 == 0 = score `div` 3
     | score `mod` 5 == 0 = score `div` 5
     | otherwise = 0
-    where score = f1+s2
+    where score
+            | f1==f2 && s1==s2 = 2*(f1+s2)
+            | f1==f2 = 2*f1 + s2
+            | s1==s2 = f1 + 2*s2
+            | otherwise = f1+s2
 
   scoreBoard b = scoreBoard [head b, last b]
 
