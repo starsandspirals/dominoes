@@ -1,0 +1,198 @@
+COM2001 Assignment 1 Test Results
+Daniel Marshall
+
+
+goesP
+
+Domino can be played on empty board
+*Dominoes> goesP (0,0) L []
+True
+
+Domino can be played on left, given orientation
+*Dominoes> goesP (1,0) L [(0,0)] 
+True
+
+Domino can be played on left, opposite orientation
+*Dominoes> goesP (0,1) L [(0,0)] 
+True
+
+Domino can be played on right, given orientation
+*Dominoes> goesP (0,1) R [(0,0)] 
+True
+
+Domino can be played on right, opposite orientation
+*Dominoes> goesP (1,0) R [(0,0)] 
+True
+
+Domino can be played on right, multiple dominoes on board
+*Dominoes> goesP (0,1) R  [(0,0),(1,2),(2,0)] 
+True
+
+Domino cannot be played on left
+*Dominoes> goesP (1,1) L [(0,0)]
+False
+
+Domino cannot be played on right
+*Dominoes> goesP (1,1) R [(0,0)]
+False
+
+Domino cannot be played on right, multiple dominoes on board
+*Dominoes> goesP (1,1) R [(0,0),(0,2),(2,3)]
+False
+
+
+knockingP
+
+Knocking when hand is empty
+*Dominoes> knockingP [] [(0,0)]
+True
+
+Not knocking when board is empty
+*Dominoes> knockingP [(0,0)] []
+False
+
+Knocking when no dominoes can be played
+*Dominoes> knockingP [(1,1),(2,2)] [(0,0),(0,6)]
+True
+
+Not knocking when a domino can be played on the left
+*Dominoes> knockingP [(1,1),(1,0)] [(0,0),(0,6)]
+False
+
+Not knocking when a domino can be played on the right
+*Dominoes> knockingP [(1,1),(6,6)] [(0,0),(0,6)]
+False
+
+
+playedP
+
+False when no dominoes on board
+*Dominoes> playedP (0,0) []
+False
+
+False when domino has not been played
+*Dominoes> playedP (0,0) [(0,1),(1,1)]
+False
+
+True when domino has been played, given orientation
+*Dominoes> playedP (0,1) [(0,1),(1,1)]
+True
+
+True when domino has been played, opposite orientation
+*Dominoes> playedP (1,0) [(0,1),(1,1)]
+True
+
+
+possPlays
+
+No possible plays when hand is empty
+*Dominoes> possPlays [] [(0,0)]
+([],[])
+
+All plays are possible when board is empty
+*Dominoes> possPlays [(0,0),(1,1),(2,2)] []
+([(0,0),(1,1),(2,2)],[(0,0),(1,1),(2,2)])
+
+Possible plays on left only
+*Dominoes> possPlays [(0,1),(1,1)] [(1,2)]
+([(0,1),(1,1)],[])
+
+Possible plays on right only
+*Dominoes> possPlays [(2,3),(2,4)] [(1,2)]
+([],[(2,3),(2,4)])
+
+Various possible plays on left and right
+*Dominoes> possPlays [(0,1),(1,1),(2,2)] [(1,2)]
+([(0,1),(1,1)],[(2,2)])
+
+Hand1 from assignment plays correctly on Board1
+*Dominoes> possPlays [(6,1),(6,5),(3,3),(0,0)] [(5,2),(2,4),(4,4),(4,0)]
+([(6,5)],[(0,0)])
+
+
+No possible plays
+*Dominoes> possPlays [(3,3),(4,4)] [(1,2)]
+([],[])
+
+
+playDom
+
+Domino played on empty board on left
+*Dominoes> playDom (0,0) [] L
+Just [(0,0)]
+
+Domino played on empty board on right
+*Dominoes> playDom (0,0) [] R
+Just [(0,0)]
+
+Domino played on left, given orientation
+*Dominoes> playDom (0,1) [(1,1),(1,2)] L
+Just [(0,1),(1,1),(1,2)]
+
+Domino played on left, opposite orientation
+*Dominoes> playDom (1,0) [(1,1),(1,2)] L
+Just [(0,1),(1,1),(1,2)]
+
+Domino played on right, given orientation
+*Dominoes> playDom (2,3) [(1,1),(1,2)] R
+Just [(1,1),(1,2),(2,3)]
+
+Domino played on right, opposite orientation
+*Dominoes> playDom (3,2) [(1,1),(1,2)] R
+Just [(1,1),(1,2),(2,3)]
+
+Domino cannot be played on left
+*Dominoes> playDom (2,3) [(1,1),(1,2)] L
+Nothing
+
+Domino cannot be played on right
+*Dominoes> playDom (3,4) [(1,1),(1,2)] L
+Nothing
+
+
+scoreBoard
+
+Empty board scores zero
+*Dominoes> scoreBoard []
+0
+
+Single 3 scores 1
+*Dominoes> scoreBoard [(0,3)]
+1
+
+Double 5 scores 2
+*Dominoes> scoreBoard [(5,5)]
+2
+
+Double 6 scores 4
+*Dominoes> scoreBoard [(6,6)]
+4
+
+Board1 from assignment scores 1
+*Dominoes> scoreBoard [(5,2),(2,4),(4,4),(4,0)]
+1
+
+Board2 from assignment scores 0
+*Dominoes> scoreBoard [(6,6),(6,0),(0,1)]
+0
+
+Board3 from assignment scores 8
+*Dominoes> scoreBoard [(6,6),(6,0),(0,1),(1,3)]
+8
+
+
+scoreN
+
+No dominoes returned for impossible score
+*Dominoes> scoreN [] 21
+[]
+
+Correct dominoes returned for possible score on empty board
+*Dominoes> scoreN [] 4
+[((6,6),L),((6,6),R)]
+
+Example in assignment is returned correctly
+*Dominoes> scoreN [(5,2),(2,4),(4,4),(4,0)] 2
+[((1,0),R),((5,0),R),((5,5),L),((6,5),L)]
+
+

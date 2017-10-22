@@ -1,3 +1,6 @@
+{- COM2001 Dominoes Assignment
+   Daniel Marshall -}
+
 module Dominoes where
 
   type Domino = (Int,Int)
@@ -78,6 +81,7 @@ module Dominoes where
     | goesP h L board && goesP h R board = (h:l, h:r)
     | goesP h L board = (h:l, r)
     | goesP h R board = (l, h:r)
+    | otherwise = (l, r)
     where (l,r) = possPlays t board
 
   
