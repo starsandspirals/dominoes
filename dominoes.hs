@@ -58,6 +58,28 @@ module Dominoes where
     | goesP d R (a:b) = playDom d b R
     | otherwise = Nothing
 
+  
+  scoreBoard :: Board -> Int
+  scoreBoard [] = 0
+
+  scoreBoard [(f1,s1)]
+    | score `mod` 3 == 0 = score `div` 3
+    | score `mod` 5 == 0 = score `div` 5
+    | otherwise = 0
+    where score = f1+s1
+
+  scoreBoard [(f1,_),(_,s2)]
+    | score `mod` 3 == 0 && score `mod` 5 == 0 = score `div` 3 + score `div` 5
+    | score `mod` 3 == 0 = score `div` 3
+    | score `mod` 5 == 0 = score `div` 5
+    | otherwise = 0
+    where score = f1+s2
+
+  scoreBoard b = scoreBoard [head b, last b]
+
+
+    
+
 
 
 
