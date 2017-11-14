@@ -5,6 +5,8 @@ module Dominoes where
 
   import MergeSort
 
+  type DomsPlayer = Hand -> Board -> (Domino, End)
+
   type Domino = (Int,Int)
 
   type Hand = [Domino]
