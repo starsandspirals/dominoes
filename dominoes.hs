@@ -6,6 +6,18 @@ module Dominoes where
   import MergeSort
   import System.Random
 
+  type DomsPlayer = Hand -> Board -> (Domino, End)
+
+  simplePlayer :: DomsPlayer
+
+  simplePlayer hand board = play
+    where left:_ = filter (\x -> goesP x L board) hand
+          right:_ = filter (\x -> goesP x R board) hand
+          play
+            | null left = (right, R)
+            | otherwise = (left, L)
+          
+
   shuffleDoms :: StdGen -> [Domino]
   
   shuffleDoms gen = shuffled
@@ -15,7 +27,6 @@ module Dominoes where
           shuffled = map fst slist
          
 
-  type DomsPlayer = Hand -> Board -> (Domino, End)
 
   type Domino = (Int,Int)
 
