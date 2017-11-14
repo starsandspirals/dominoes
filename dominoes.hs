@@ -3,6 +3,8 @@
 
 module Dominoes where
 
+  import MergeSort
+
   type Domino = (Int,Int)
 
   type Hand = [Domino]
