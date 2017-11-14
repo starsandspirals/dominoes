@@ -4,6 +4,16 @@
 module Dominoes where
 
   import MergeSort
+  import System.Random
+
+  shuffleDoms :: StdGen -> [Domino]
+  
+  shuffleDoms gen = shuffled
+    where rlist = take 28 (randoms gen :: [Int])
+          zlist = zip allDominoes rlist
+          slist = mergesort (\(_, n1) (_, n2) -> n1 < n2) zlist
+          shuffled = map fst slist
+         
 
   type DomsPlayer = Hand -> Board -> (Domino, End)
 
