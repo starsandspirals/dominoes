@@ -8,11 +8,19 @@ module Dominoes where
 
   type DomsPlayer = Hand -> Board -> (Domino, End)
 
+  
+  scoreDom :: Domino -> Board -> End -> Int
+  
+  scoreDom d board end = score
+    where score = scoreBoard move
+          move = resMaybe maybemove
+          maybemove = playDom d board end
+
+  
   simplePlayer :: DomsPlayer
 
   simplePlayer hand board = play
-    where left:_ = filter (\x -> goesP x L board) hand
-          right:_ = filter (\x -> goesP x R board) hand
+    where (left:_, right:_) = possPlays hand board
           play
             | null left = (right, R)
             | otherwise = (left, L)
@@ -21,22 +29,21 @@ module Dominoes where
   hsdPlayer :: DomsPlayer
 
   hsdPlayer hand board = play
-    where lefts = filter (\x -> goesP x L board) hand
-          rights = filter (\x -> goesP x R board) hand
-          plays = map (\x -> (x, L)) lefts ++ map (\x -> (x, R)) rights
-          scores = map (\(d, end) -> scoreBoard (resMaybe (playDom d board end))) plays
-          zipped = zip plays scores
-          sorted = mergesort (\(_, n1) (_, n2) -> n1 > n2) sorted
+    where (lefts, rights) = possPlays hand board
+          moves = map (\x -> (x, L)) lefts ++ map (\x -> (x, R)) rights
+          scores = map (\(d, end) -> scoreDom d board end) moves
+          zipped = zip moves scores
+          sorted = mergesort (\(_, n1) (_, n2) -> n1 > n2) zipped
           play:_ = map fst sorted
           
 
   shuffleDoms :: StdGen -> [Domino]
   
   shuffleDoms gen = shuffled
-    where rlist = take 28 (randoms gen :: [Int])
-          zlist = zip allDominoes rlist
-          slist = mergesort (\(_, n1) (_, n2) -> n1 < n2) zlist
-          shuffled = map fst slist
+    where randomlist = take 28 (randoms gen :: [Int])
+          zipped = zip allDominoes randomlist
+          sorted = mergesort (\(_, n1) (_, n2) -> n1 < n2) zipped
+          shuffled = map fst sorted
          
 
 
