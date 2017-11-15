@@ -16,6 +16,18 @@ module Dominoes where
           play
             | null left = (right, R)
             | otherwise = (left, L)
+
+ 
+  hsdPlayer :: DomsPlayer
+
+  hsdPlayer hand board = play
+    where lefts = filter (\x -> goesP x L board) hand
+          rights = filter (\x -> goesP x R board) hand
+          plays = map (\x -> (x, L)) lefts ++ map (\x -> (x, R)) rights
+          scores = map (\(d, end) -> scoreBoard (resMaybe (playDom d board end))) plays
+          zipped = zip plays scores
+          sorted = mergesort (\(_, n1) (_, n2) -> n1 > n2) sorted
+          play:_ = map fst sorted
           
 
   shuffleDoms :: StdGen -> [Domino]
