@@ -47,7 +47,7 @@ module Dominoes where
   type Board = [Domino]
 
   data End = L | R
-             deriving (Show)
+             deriving (Eq, Ord, Show)
 
   allDominoes = [(0,0),
                  (1,0), (1,1),
