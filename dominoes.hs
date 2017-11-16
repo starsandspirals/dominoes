@@ -50,35 +50,35 @@ module Dominoes where
  
   playDomsRound :: DomsPlayer -> DomsPlayer -> Int -> (Int, Int)
   
-  playDomsRound p1 p2 seed = playDomsRoundA p1 p2 h1 h2 1 []
+  playDomsRound play1 play2 seed = playDomsRoundA play1 play2 hand1 hand2 []
     where randgen = mkStdGen seed
           deck = shuffleDoms randgen
           hands = take 14 deck
-          (h1, h2) = splitAt 7 hands
+          (hand1, hand2) = splitAt 7 hands
 
 
-  playDomsRoundA :: DomsPlayer -> DomsPlayer -> Hand -> Hand -> Int 
-                      -> Board -> (Int, Int)
+  playDomsRoundA :: DomsPlayer -> DomsPlayer -> Hand -> Hand ->
+                      Board -> (Int, Int)
   
-  playDomsRoundA p1 p2 h1 h2 turn b
-    | knockingP h1 b && knockingP h2 b = (0, 0)
-    | turn == 1 && knockingP h1 b = playDomsRoundA p1 p2 h1 h2 2 b
-    | turn == 2 && knockingP h2 b = playDomsRoundA p1 p2 h1 h2 1 b
-    | turn == 1 = (score1 + next1, next2)
-    | turn == 2 = (next1, score2 + next2)
-    where (move1, end1) = p1 h1 b
-          (move2, end2) = p2 h2 b
-          newh1 = filter (\x -> x /= move1) h1
-          newh2 = filter (\x -> x /= move2) h2
-          score1 = scoreDom move1 b end1
-          score2 = scoreDom move2 b end2
-          newb
-            | turn == 1 = resMaybe (playDom move1 b end1)
-            | turn == 2 = resMaybe (playDom move2 b end2)
-          (next1, next2)
-            | turn == 1 = playDomsRoundA p1 p2 newh1 h2 2 newb
-            | turn == 2 = playDomsRoundA p1 p2 h1 newh2 1 newb
+  playDomsRoundA play1 play2 hand1 hand2 board
+    | knockingP hand1 board && knockingP hand2 board = (0, 0)
+    | otherwise = (score1 + next1, score2 + next2)
+    where (score1, nhand1, nboard1) = playTurn play1 hand1 board
+          (score2, nhand2, nboard2) = playTurn play2 nhand1 nboard1
+          (next1, next2) = playDomsRoundA play1 play2 nhand1 nhand2 nboard2
+
+    
          
+  playTurn :: DomsPlayer -> Hand -> Board -> (Int, Hand, Board)
+
+  playTurn player hand board
+    | knockingP hand board = (0, hand, board)
+    | otherwise = (score, nhand, nboard)
+    where (dom, end) = player hand board
+          nhand = filter (\x -> x /= dom) hand
+          nboard = resMaybe (playDom dom board end)
+          score = scoreBoard nboard
+
 
 
   type Domino = (Int,Int)
