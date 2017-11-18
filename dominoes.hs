@@ -9,14 +9,6 @@ module Dominoes where
   type DomsPlayer = Hand -> Board -> (Domino, End)
 
   
-  scoreDom :: Domino -> Board -> End -> Int
-  
-  scoreDom d board end = score
-    where score = scoreBoard move
-          move = resMaybe maybemove
-          maybemove = playDom d board end
-
-  
   simplePlayer :: DomsPlayer
 
   simplePlayer hand board = play
@@ -39,6 +31,13 @@ module Dominoes where
           play:_ = map fst sorted
           
 
+  scoreDom :: Domino -> Board -> End -> Int
+  
+  scoreDom d board end = score
+    where score = scoreBoard move
+          move = resMaybe (playDom d board end)
+
+
   shuffleDoms :: StdGen -> [Domino]
   
   shuffleDoms gen = shuffled
@@ -50,22 +49,21 @@ module Dominoes where
  
   playDomsRound :: DomsPlayer -> DomsPlayer -> Int -> (Int, Int)
   
-  playDomsRound play1 play2 seed = playDomsRoundA play1 play2 hand1 hand2 []
+  playDomsRound play1 play2 seed = playRound play1 play2 hand1 hand2 []
     where randgen = mkStdGen seed
           deck = shuffleDoms randgen
-          hands = take 14 deck
-          (hand1, hand2) = splitAt 7 hands
+          hands = take 18 deck
+          (hand1, hand2) = splitAt 9 hands
 
 
-  playDomsRoundA :: DomsPlayer -> DomsPlayer -> Hand -> Hand ->
-                      Board -> (Int, Int)
+  playRound :: DomsPlayer -> DomsPlayer -> Hand -> Hand -> Board -> (Int, Int)
   
-  playDomsRoundA play1 play2 hand1 hand2 board
+  playRound play1 play2 hand1 hand2 board
     | knockingP hand1 board && knockingP hand2 board = (0, 0)
     | otherwise = (score1 + next1, score2 + next2)
     where (score1, nhand1, nboard1) = playTurn play1 hand1 board
-          (score2, nhand2, nboard2) = playTurn play2 nhand1 nboard1
-          (next1, next2) = playDomsRoundA play1 play2 nhand1 nhand2 nboard2
+          (score2, nhand2, nboard2) = playTurn play2 hand2 nboard1
+          (next1, next2) = playRound play1 play2 nhand1 nhand2 nboard2
 
     
          
@@ -79,6 +77,8 @@ module Dominoes where
           nboard = resMaybe (playDom dom board end)
           score = scoreBoard nboard
 
+
+  -- Assignment 1 code below
 
 
   type Domino = (Int,Int)
