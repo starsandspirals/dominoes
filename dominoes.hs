@@ -9,8 +9,13 @@ module Dominoes where
   type DomsPlayer = Hand -> Board -> (Domino, End)
 
   
+  {- simplePlayer is a very simple DomsPlayer, taking a hand and a board and
+     returning a domino that will go at one of the ends of the board. -}
   simplePlayer :: DomsPlayer
 
+  {- First we list all the dominoes that will go at either end; then, if 
+     there exist dominoes that can be played on the left, we play the first 
+     one, and otherwise, we play the first one that will go on the right. -}
   simplePlayer hand board = play
     where (lefts, rights) = possPlays hand board
           left:_ = lefts
@@ -20,8 +25,15 @@ module Dominoes where
             | otherwise = (left, L)
 
  
+  {- hsdPlayer is a slightly more complex domsPlayer, returning the domino
+     and end giving the highest scoring possible move that can be played on
+     the current board. -}
   hsdPlayer :: DomsPlayer
 
+  {- Again, list all the dominoes that will go at either end. Then map each
+     possible move to the score it will give when played. Sort these moves
+     in descending order by their score, and finally return the highest
+     scoring move which is now at the start of the list. -}
   hsdPlayer hand board = play
     where (lefts, rights) = possPlays hand board
           moves = map (\x -> (x, L)) lefts ++ map (\x -> (x, R)) rights
@@ -31,15 +43,25 @@ module Dominoes where
           play:_ = map fst sorted
           
 
+  {- scoreDom is a small auxiliary function, returning the score that a
+     given domino will receive when played on a given board at a given
+     end. -}
   scoreDom :: Domino -> Board -> End -> Int
   
+  {- We make the move using playDom and then score the resulting board using
+     scoreBoard; this is safe as scoreDom is only called on valid moves. -}
   scoreDom d board end = score
     where score = scoreBoard move
           move = resMaybe (playDom d board end)
 
 
+  {- shuffleDoms takes in a random number generator and returns the full
+     deck of dominoes shuffled into random order. -}
   shuffleDoms :: StdGen -> [Domino]
   
+  {- We generate 28 random numbers using the generator, attach these to the
+     dominoes in the deck, sort in ascending order using the random numbers,
+     and then return the list of dominoes in random order. -}
   shuffleDoms gen = shuffled
     where randomlist = take 28 (randoms gen :: [Int])
           zipped = zip allDominoes randomlist
@@ -47,8 +69,15 @@ module Dominoes where
           shuffled = map fst sorted
 
  
+  {- playDomsRound is the main function for the dominoes game, which
+     takes in two domsPlayers and a seed for the random number generator
+     and plays a full game of 5s-and-3s dominoes. -}
   playDomsRound :: DomsPlayer -> DomsPlayer -> Int -> (Int, Int)
   
+  {- In the function we initialise the game, by shuffling the deck and
+     dealing a hand of 9 dominoes to each player, and then we call an
+     auxiliary function called playRound with an empty board to deal
+     with playing out the game. -}
   playDomsRound play1 play2 seed = playRound play1 play2 hand1 hand2 []
     where randgen = mkStdGen seed
           deck = shuffleDoms randgen
@@ -56,8 +85,15 @@ module Dominoes where
           (hand1, hand2) = splitAt 9 hands
 
 
+  {- playRound is our first auxiliary function, used to deal with the
+     mechanics of actually playing the dominoes game. -}
   playRound :: DomsPlayer -> DomsPlayer -> Hand -> Hand -> Board -> (Int, Int)
   
+  {- We use another auxiliary function playTurn to play each turn of the
+     game, calling it on each player in turn and updating the hands, board
+     and scores as we go, until both players are knocking and the game
+     is over; then we return the scores, passing them back to
+     playDomsRound. -}
   playRound play1 play2 hand1 hand2 board
     | knockingP hand1 board && knockingP hand2 board = (0, 0)
     | otherwise = (score1 + next1, score2 + next2)
@@ -67,8 +103,16 @@ module Dominoes where
 
     
          
+  {- playTurn is the final auxiliary function for playDomsRound, which
+     takes in a player, their hand and the current board, and plays out
+     their turn, returning the score and the new hand and board. -}
   playTurn :: DomsPlayer -> Hand -> Board -> (Int, Hand, Board)
 
+  {- If the player is knocking, they don't score anything and we pass
+     the turn to the next player; otherwise, call the player to play
+     their move onto the board, remove the domino they played from
+     the hand, and score the move, returning all this information
+     and passing it back to playRound. -}
   playTurn player hand board
     | knockingP hand board = (0, hand, board)
     | otherwise = (score, nhand, nboard)
