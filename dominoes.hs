@@ -100,7 +100,6 @@ module Dominoes where
     where (score1, nhand1, nboard1) = playTurn play1 hand1 board
           (score2, nhand2, nboard2) = playTurn play2 hand2 nboard1
           (next1, next2) = playRound play1 play2 nhand1 nhand2 nboard2
-
     
          
   {- playTurn is the final auxiliary function for playDomsRound, which

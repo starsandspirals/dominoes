@@ -1,0 +1,193 @@
+COM2001 Assignment 2 Test Results
+Daniel Marshall
+
+
+simplePlayer
+
+Domino can be played on left
+*Dominoes> simplePlayer [(1,1)] [(1,2)]
+((1,1),L)
+
+Domino can be played on right
+*Dominoes> simplePlayer [(1,1)] [(2,1)]
+((1,1),R)
+
+Domino can be played on left, multiple dominoes in hand
+*Dominoes> simplePlayer [(3,3),(4,4),(1,1)] [(1,2)]
+((1,1),L)
+
+Domino can be played on right, multiple dominoes in hand
+*Dominoes> simplePlayer [(3,3),(2,2),(4,4)] [(1,2)]
+((2,2),R)
+
+Multiple dominoes can be played, first selected
+*Dominoes> simplePlayer [(1,1),(1,2),(1,3)] [(1,4)]
+((1,1),L)
+
+
+scoreDom
+
+Opening move scored correctly
+*Dominoes> scoreDom (6,6) [] L
+4
+
+Move scored correctly on left
+*Dominoes> scoreDom (5,2) [(2,4),(4,4),(4,0)] L
+1
+
+Move scored correctly on right
+*Dominoes> scoreDom (1,3) [(6,6),(6,0),(0,1)] R
+8
+
+
+hsdPlayer
+
+Domino can be played on left
+*Dominoes> hsdPlayer [(1,1)] [(1,2)]
+((1,1),L)
+
+Domino can be played on right
+*Dominoes> hsdPlayer [(1,1)] [(2,1)]
+((1,1),R)
+
+Domino can be played on left, multiple dominoes in hand
+*Dominoes> hsdPlayer [(3,3),(4,4),(1,1)] [(1,2)]
+((1,1),L)
+
+Domino can be played on right, multiple dominoes in hand
+*Dominoes> hsdPlayer [(3,3),(2,2),(4,4)] [(1,2)]
+((2,2),R)
+
+Multiple dominoes can be played, highest scoring selected
+*Dominoes> hsdPlayer [(1,1),(1,2),(1,3)] [(1,4)]
+((1,2),L)
+
+
+shuffleDoms
+
+Randomly ordered deck generated, no repeats
+*Dominoes> shuffleDoms (mkStdGen 1)
+[(3,3),(3,1),(2,1),(6,2),(4,2),(6,6),(6,4),(3,0),(6,3),(2,2),(5,4),(6,1),(4,1),
+(1,0),(5,3),(1,1),(4,4),(4,0),(5,5),(5,0),(5,1),(3,2),(4,3),(0,0),(6,0),(5,2),
+(2,0),(6,5)]
+
+Different randomly ordered deck generated, no repeats
+*Dominoes> shuffleDoms (mkStdGen 2)
+[(5,3),(2,0),(4,0),(5,2),(5,4),(1,0),(2,1),(5,5),(3,0),(4,4),(0,0),(6,3),(6,1),
+(4,2),(3,2),(6,2),(5,0),(3,3),(4,3),(4,1),(1,1),(2,2),(6,6),(3,1),(5,1),(6,4),
+(6,5),(6,0)]
+
+
+playTurn
+
+Full game can be played with simplePlayers
+
+*Dominoes> x = simplePlayer
+*Dominoes> y = simplePlayer
+*Dominoes> (hand1, hand2) = splitAt 9 (take 18 (shuffleDoms (mkStdGen 1)))
+
+*Dominoes> playTurn x hand1 []
+(2,[(3,1),(2,1),(6,2),(4,2),(6,6),(6,4),(3,0),(6,3)],[(3,3)])
+*Dominoes> hand1 = [(3,1),(2,1),(6,2),(4,2),(6,6),(6,4),(3,0),(6,3)]
+
+*Dominoes> playTurn y hand2 [(3,3)]
+(0,[(2,2),(5,4),(6,1),(4,1),(1,0),(1,1),(4,4),(4,0)],[(5,3),(3,3)])
+*Dominoes> hand2 = [(2,2),(5,4),(6,1),(4,1),(1,0),(1,1),(4,4),(4,0)]
+
+*Dominoes> playTurn x hand1 [(5,3),(3,3)]
+(2,[(2,1),(6,2),(4,2),(6,6),(6,4),(3,0),(6,3)],[(5,3),(3,3),(3,1)])
+*Dominoes> hand1 = [(2,1),(6,2),(4,2),(6,6),(6,4),(3,0),(6,3)]
+
+*Dominoes> playTurn y hand2 [(5,3),(3,3),(3,1)]
+(1,[(2,2),(6,1),(4,1),(1,0),(1,1),(4,4),(4,0)],[(4,5),(5,3),(3,3),(3,1)])
+*Dominoes> hand2 = [(2,2),(6,1),(4,1),(1,0),(1,1),(4,4),(4,0)]
+
+*Dominoes> playTurn x hand1 [(4,5),(5,3),(3,3),(3,1)]
+(1,[(2,1),(6,2),(6,6),(6,4),(3,0),(6,3)],[(2,4),(4,5),(5,3),(3,3),(3,1)])
+*Dominoes> hand1 = [(2,1),(6,2),(6,6),(6,4),(3,0),(6,3)]
+
+*Dominoes> playTurn y hand2 [(2,4),(4,5),(5,3),(3,3),(3,1)]
+(1,[(6,1),(4,1),(1,0),(1,1),(4,4),(4,0)],[(2,2),(2,4),(4,5),(5,3),(3,3),(3,1)])
+*Dominoes> hand2 = [(6,1),(4,1),(1,0),(1,1),(4,4),(4,0)]
+
+*Dominoes> playTurn x hand1 [(2,2),(2,4),(4,5),(5,3),(3,3),(3,1)]
+(0,[(6,2),(6,6),(6,4),(3,0),(6,3)],[(1,2),(2,2),(2,4),(4,5),(5,3),(3,3),(3,1)])
+*Dominoes> hand1 = [(6,2),(6,6),(6,4),(3,0),(6,3)]
+
+*Dominoes> playTurn y hand2 [(1,2),(2,2),(2,4),(4,5),(5,3),(3,3),(3,1)]
+(0,[(4,1),(1,0),(1,1),(4,4),(4,0)],[(6,1),(1,2),(2,2),(2,4),(4,5),(5,3),(3,3),(3,1)])
+*Dominoes> hand2 = [(4,1),(1,0),(1,1),(4,4),(4,0)]
+
+*Dominoes> playTurn x hand1 [(6,1),(1,2),(2,2),(2,4),(4,5),(5,3),(3,3),(3,1)]
+(1,[(6,6),(6,4),(3,0),(6,3)],[(2,6),(6,1),(1,2),(2,2),(2,4),(4,5),(5,3),(3,3),(3,1)])
+*Dominoes> hand1 = [(6,6),(6,4),(3,0),(6,3)]
+
+*Dominoes> playTurn y hand2 [(2,6),(6,1),(1,2),(2,2),(2,4),(4,5),(5,3),(3,3),(3,1)]
+(2,[(1,0),(1,1),(4,4),(4,0)],[(2,6),(6,1),(1,2),(2,2),(2,4),(4,5),(5,3),(3,3),(3,1),(1,4)])
+*Dominoes> hand2 = [(1,0),(1,1),(4,4),(4,0)]
+
+*Dominoes> playTurn x hand1 [(2,6),(6,1),(1,2),(2,2),(2,4),(4,5),(5,3),(3,3),(3,1),(1,4)]
+(0,[(6,6),(3,0),(6,3)],[(2,6),(6,1),(1,2),(2,2),(2,4),(4,5),(5,3),(3,3),(3,1),(1,4),(4,6)])
+*Dominoes> hand1 = [(6,6),(3,0),(6,3)]
+
+*Dominoes> playTurn y hand2 [(2,6),(6,1),(1,2),(2,2),(2,4),(4,5),(5,3),(3,3),(3,1),(1,4),(4,6)]
+(0,[(1,0),(1,1),(4,4),(4,0)],[(2,6),(6,1),(1,2),(2,2),(2,4),(4,5),(5,3),(3,3),(3,1),(1,4),(4,6)])
+*Dominoes> hand2 = [(1,0),(1,1),(4,4),(4,0)]
+
+*Dominoes> playTurn x hand1 [(2,6),(6,1),(1,2),(2,2),(2,4),(4,5),(5,3),(3,3),(3,1),(1,4),(4,6)]
+(0,[(3,0),(6,3)],[(2,6),(6,1),(1,2),(2,2),(2,4),(4,5),(5,3),(3,3),(3,1),(1,4),(4,6),(6,6)])
+*Dominoes> hand1 = [(3,0),(6,3)]
+
+*Dominoes> playTurn y hand2 [(2,6),(6,1),(1,2),(2,2),(2,4),(4,5),(5,3),(3,3),(3,1),(1,4),(4,6),(6,6)]
+(0,[(1,0),(1,1),(4,4),(4,0)],[(2,6),(6,1),(1,2),(2,2),(2,4),(4,5),(5,3),(3,3),(3,1),(1,4),(4,6)])
+*Dominoes> hand2 = [(1,0),(1,1),(4,4),(4,0)]
+
+*Dominoes> playTurn x hand1 [(2,6),(6,1),(1,2),(2,2),(2,4),(4,5),(5,3),(3,3),(3,1),(1,4),(4,6),(6,6)]
+(1,[(3,0)],[(2,6),(6,1),(1,2),(2,2),(2,4),(4,5),(5,3),(3,3),(3,1),(1,4),(4,6),(6,6),(6,3)])
+*Dominoes> hand1 = [(3,0)]
+
+*Dominoes> playTurn y hand2 [(2,6),(6,1),(1,2),(2,2),(2,4),(4,5),(5,3),(3,3),(3,1),(1,4),(4,6),(6,6),(6,3)]
+(0,[(1,0),(1,1),(4,4),(4,0)],[(2,6),(6,1),(1,2),(2,2),(2,4),(4,5),(5,3),(3,3),(3,1),(1,4),(4,6),(6,6),(6,3)])
+*Dominoes> hand2 = [(1,0),(1,1),(4,4),(4,0)]
+
+*Dominoes> playTurn x hand1 [(2,6),(6,1),(1,2),(2,2),(2,4),(4,5),(5,3),(3,3),(3,1),(1,4),(4,6),(6,6),(6,3)]
+(0,[],[(2,6),(6,1),(1,2),(2,2),(2,4),(4,5),(5,3),(3,3),(3,1),(1,4),(4,6),(6,6),(6,3),(3,0)])
+*Dominoes> hand1 = []
+
+*Dominoes> playTurn y hand2 [(2,6),(6,1),(1,2),(2,2),(2,4),(4,5),(5,3),(3,3),(3,1),(1,4),(4,6),(6,6),(6,3),(3,0)]
+(1,[(1,1),(4,4),(4,0)],[(2,6),(6,1),(1,2),(2,2),(2,4),(4,5),(5,3),(3,3),(3,1),(1,4),(4,6),(6,6),(6,3),(3,0),(0,1)])
+*Dominoes> hand2 = [(1,1),(4,4),(4,0)]
+
+*Dominoes> playTurn y hand2 [(2,6),(6,1),(1,2),(2,2),(2,4),(4,5),(5,3),(3,3),(3,1),(1,4),(4,6),(6,6),(6,3),(3,0),(0,1)]
+(0,[(4,4),(4,0)],[(2,6),(6,1),(1,2),(2,2),(2,4),(4,5),(5,3),(3,3),(3,1),(1,4),(4,6),(6,6),(6,3),(3,0),(0,1),(1,1)])
+*Dominoes> hand2 = [(4,4),(4,0)]
+
+*Dominoes> knockingP hand1 [(2,6),(6,1),(1,2),(2,2),(2,4),(4,5),(5,3),(3,3),(3,1),(1,4),(4,6),(6,6),(6,3),(3,0),(0,1),(1,1)]
+True
+*Dominoes> knockingP hand2 [(2,6),(6,1),(1,2),(2,2),(2,4),(4,5),(5,3),(3,3),(3,1),(1,4),(4,6),(6,6),(6,3),(3,0),(0,1),(1,1)]
+True
+
+*Dominoes> score1 = 2+2+1+0+1+0+0+1+0
+*Dominoes> score1
+7
+*Dominoes> score2 = 0+1+1+0+2+0+0+0+1+0
+*Dominoes> score2
+5
+
+
+playDomsRound
+
+Game played with simplePlayers gives same score
+*Dominoes> playDomsRound simplePlayer simplePlayer 1
+(7,5)
+
+Game with simplePlayers and different seed gives different score
+*Dominoes> playDomsRound simplePlayer simplePlayer 2
+(5,6)
+
+Game with hsdPlayers and same seed gives different (higher) scores
+*Dominoes> playDomsRound hsdPlayer hsdPlayer 1
+(18,7)
+
+
+
