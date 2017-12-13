@@ -1,10 +1,14 @@
 import DomsMatch
+import Debug.Trace
 
 type Situation = GameState -> Bool
 
 type Strategy = GameState -> Move
 
 type Tactic = (Situation, Strategy)
+
+dangerousDoms :: [Dom]
+dangerousDoms = [(3,0),(4,1),(5,2),(6,3),(3,3),(6,6)]
 
 hsdSituation :: Situation
 hsdSituation _ = True
@@ -46,7 +50,34 @@ scoreStrategy i gs@(h,_,p,b,s) = move
 
 score61Tactic :: Tactic
 score61Tactic = (score61Situation, score61Strategy)
-    
+
+dangerousSituation :: Situation
+dangerousSituation (h,_,_,_,_) = notempty
+  where
+    notempty = not (null safe)
+    safe = filter (\x -> not (elem x dangerousDoms)) h
+
+dangerousStrategy :: Strategy
+dangerousStrategy (h,_,p,b,s) = move
+  where
+    plays = filter (\x -> not (dangerous x h)) h
+    move
+      | null plays = hsdPlayer h b p s
+      | knocking plays b = hsdPlayer h b p s
+      | otherwise = hsdPlayer plays b p s
+
+dangerousTactic :: Tactic
+dangerousTactic = (dangerousSituation, dangerousStrategy)
+
+dangerous :: Dom -> Hand -> Bool
+dangerous (a,b) h
+  | not (elem (a,b) dangerousDoms) = False
+  | null knocks = True
+  | otherwise = False
+  where
+    knocks = filter (\(x,y) -> x == a || x == b || y == a || y == b) rest
+    rest = filter (\x -> x /= (a,b)) h
+
 playerFramework :: GameState -> [Tactic] -> Move
 
 playerFramework (h1,h2,p,b,s) tactics = move
@@ -110,7 +141,5 @@ isJust Nothing = False
 resMaybe :: (Maybe a) -> a 
 resMaybe (Just x) = x
 
-
-    
 
     
