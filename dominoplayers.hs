@@ -1,4 +1,5 @@
 import DomsMatch
+import MergeSort
 import Debug.Trace
 
 type Situation = GameState -> Bool
@@ -10,8 +11,11 @@ type Tactic = (Situation, Strategy)
 dangerousDoms :: [Dom]
 dangerousDoms = [(3,0),(4,1),(5,2),(6,3),(3,3),(6,6)]
 
+pips :: [Int]
+pips = [0..6]
+
 cheatList :: [Int]
-cheatList = [0..305]
+cheatList = [170..183]
 
 hsdSituation :: Situation
 hsdSituation _ = True
@@ -55,9 +59,8 @@ score61Tactic :: Tactic
 score61Tactic = (score61Situation, score61Strategy)
 
 dangerousSituation :: Situation
-dangerousSituation (h,_,_,_,_) = notempty
+dangerousSituation (h,_,_,_,_) = not (null safe)
   where
-    notempty = not (null safe)
     safe = filter (\x -> not (elem x dangerousDoms)) h
 
 dangerousStrategy :: Strategy
@@ -81,6 +84,33 @@ dangerous (a,b) h
     knocks = filter (\(x,y) -> x == a || x == b || y == a || y == b) rest
     rest = filter (\x -> x /= (a,b)) h
 
+majoritySituation :: Situation
+majoritySituation (h,_,_,b,_) = max >= 4
+  where
+    sets = map (\x -> filterPips h x) pips
+    lengths = map (\x -> length x) sets
+    max = maximum lengths
+
+majorityStrategy :: Strategy
+majorityStrategy (h,_,p,b,s) = move
+  where
+    sets = map (\x -> (x, filterPips h x)) pips
+    lengths = map (\(x,l) -> (x,length l)) sets
+    (pip,_):_ = mergesort (\(_,l1) (_,l2) -> l1 > l2) lengths
+    double = (pip, pip)
+    [(_,set)] = filter (\(x,l) -> x == pip) sets
+    move
+      | elem double h && goesLP double b = (double, L)
+      | elem double h && goesRP double b = (double, R)
+      | knocking set b = hsdPlayer h b p s
+      | otherwise = hsdPlayer h b p s
+
+filterPips :: Hand -> Int -> Hand
+filterPips h i = filter (\(a,b) -> a==i || b==i) h
+
+majorityTactic :: Tactic
+majorityTactic = (majoritySituation, majorityStrategy)
+
 cheatingSituation :: Situation
 cheatingSituation _ = True
 
@@ -97,10 +127,9 @@ cheatingStrategy (_,_,p,b,s) = move
     scores = map (\x -> (x, scoreDom x L b)) doms
     winners = filter (\(_,s) -> s == 61) scores
     play:_ = map (\(x,_) -> x) winners
-    move = (play, L)
+    move = traceShow (show play) (play, L)
 
 cheatingTactic = (cheatingSituation, cheatingStrategy)
-    
 
 playerFramework :: GameState -> [Tactic] -> Move
 
