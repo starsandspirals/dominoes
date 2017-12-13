@@ -10,6 +10,9 @@ type Tactic = (Situation, Strategy)
 dangerousDoms :: [Dom]
 dangerousDoms = [(3,0),(4,1),(5,2),(6,3),(3,3),(6,6)]
 
+cheatList :: [Int]
+cheatList = [0..305]
+
 hsdSituation :: Situation
 hsdSituation _ = True
 
@@ -78,6 +81,27 @@ dangerous (a,b) h
     knocks = filter (\(x,y) -> x == a || x == b || y == a || y == b) rest
     rest = filter (\x -> x /= (a,b)) h
 
+cheatingSituation :: Situation
+cheatingSituation _ = True
+
+cheatingStrategy :: Strategy
+
+cheatingStrategy (_,_,_,InitBoard,_) = ((0,183),L)
+
+cheatingStrategy (_,_,p,b,s) = move
+  where
+    score = playerScore p s
+    difference = 61 - score
+    (Board (c,d) (e,f) _) = b
+    doms = map (\x -> (x,c)) cheatList
+    scores = map (\x -> (x, scoreDom x L b)) doms
+    winners = filter (\(_,s) -> s == 61) scores
+    play:_ = map (\(x,_) -> x) winners
+    move = (play, L)
+
+cheatingTactic = (cheatingSituation, cheatingStrategy)
+    
+
 playerFramework :: GameState -> [Tactic] -> Move
 
 playerFramework (h1,h2,p,b,s) tactics = move
@@ -115,6 +139,13 @@ mediumPlayer :: DomsPlayer
 mediumPlayer h1 db p s = move
   where
     tactics = [firstDropTactic, score61Tactic, hsdTactic]
+    h2 = opponentPlays h1 db
+    move = playerFramework (h1,h2,p,db,s) tactics
+
+cheatingPlayer :: DomsPlayer
+cheatingPlayer h1 db p s = move
+  where
+    tactics = [cheatingTactic]
     h2 = opponentPlays h1 db
     move = playerFramework (h1,h2,p,db,s) tactics
 
