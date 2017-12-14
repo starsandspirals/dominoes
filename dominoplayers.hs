@@ -14,8 +14,8 @@ dangerousDoms = [(3,0),(4,1),(5,2),(6,3),(3,3),(6,6)]
 pips :: [Int]
 pips = [0..6]
 
-cheatList :: [Int]
-cheatList = [170..183]
+seeds :: [Int]
+seeds = [0..1000]
 
 hsdSituation :: Situation
 hsdSituation _ = True
@@ -37,7 +37,7 @@ firstDropTactic :: Tactic
 firstDropTactic = (firstDropSituation, firstDropStrategy)
 
 score61Situation :: Situation
-score61Situation (h,_,p,b,s) = (playerScore p s) > 53
+score61Situation (h,_,p,_,s) = (playerScore p s) > 53
 
 score61Strategy :: Strategy
 score61Strategy gs = scoreStrategy 61 gs
@@ -81,7 +81,7 @@ dangerous (a,b) h
   | null knocks = True
   | otherwise = False
   where
-    knocks = filter (\(x,y) -> x == a || x == b || y == a || y == b) rest
+    knocks = filter (\(x,y) -> samePips (x,y) (a,b)) rest
     rest = filter (\x -> x /= (a,b)) h
 
 majoritySituation :: Situation
@@ -105,31 +105,44 @@ majorityStrategy (h,_,p,b,s) = move
       | knocking set b = hsdPlayer h b p s
       | otherwise = hsdPlayer h b p s
 
+opponentNearSituation :: Situation
+opponentNearSituation (_,_,_,InitBoard,s) = False
+opponentNearSituation (_,_,p,b,s) = (opponentScore p s) > 53
+
+opponentNearStrategy :: Strategy
+opponentNearStrategy (h1,h2,p,b,s) = move
+  where
+    score = opponentScore p s
+    difference = 61 - score
+    scoringmoves = scoreN b difference
+    opponentmoves = filter (\(x,_) -> elem x h2) scoringmoves
+    (Board (e1,_) (_,e2) _) = b
+    playeroptions = map (\(x,e) -> blockDom h1 x e e1 e2) opponentmoves
+    playerlists = filter (\x -> not(null x)) playeroptions
+    firstlist:_ = playerlists
+    move
+      | null playerlists = hsdPlayer h1 b p s
+      | not (knocking firstlist b) = hsdPlayer firstlist b p s
+      | otherwise = hsdPlayer h1 b p s
+
+opponentNearTactic :: Tactic
+opponentNearTactic = (opponentNearSituation, opponentNearStrategy)
+
 filterPips :: Hand -> Int -> Hand
 filterPips h i = filter (\(a,b) -> a==i || b==i) h
 
+samePips :: Dom -> Dom -> Bool
+samePips (a,b) (c,d) = a == c || b == c || a == d || b == d
+
+blockDom :: Hand -> Dom -> End -> Int -> Int -> Hand
+blockDom h (x1,y1) end e1 e2
+  | end == L = filter (\(a,b) -> not(a == e1 && b /= x1 && b /= y1)
+                              || (b == e1 && a /= x1 && a /= y1)) h
+  | end == R = filter (\(a,b) -> not(a == e2 && b /= x1 && b /= y1)
+                              || (b == e2 && a /= x1 && a /= y1)) h
+
 majorityTactic :: Tactic
 majorityTactic = (majoritySituation, majorityStrategy)
-
-cheatingSituation :: Situation
-cheatingSituation _ = True
-
-cheatingStrategy :: Strategy
-
-cheatingStrategy (_,_,_,InitBoard,_) = ((0,183),L)
-
-cheatingStrategy (_,_,p,b,s) = move
-  where
-    score = playerScore p s
-    difference = 61 - score
-    (Board (c,d) (e,f) _) = b
-    doms = map (\x -> (x,c)) cheatList
-    scores = map (\x -> (x, scoreDom x L b)) doms
-    winners = filter (\(_,s) -> s == 61) scores
-    play:_ = map (\(x,_) -> x) winners
-    move = traceShow (show play) (play, L)
-
-cheatingTactic = (cheatingSituation, cheatingStrategy)
 
 playerFramework :: GameState -> [Tactic] -> Move
 
@@ -157,6 +170,10 @@ playerScore :: Player -> Scores -> Int
 playerScore P1 (s,_) = s
 playerScore P2 (_,s) = s
 
+opponentScore :: Player -> Scores -> Int
+opponentScore P1 (_,s) = s
+opponentScore P2 (s,_) = s
+
 easyPlayer :: DomsPlayer
 easyPlayer h1 db p s = move
   where
@@ -171,10 +188,11 @@ mediumPlayer h1 db p s = move
     h2 = opponentPlays h1 db
     move = playerFramework (h1,h2,p,db,s) tactics
 
-cheatingPlayer :: DomsPlayer
-cheatingPlayer h1 db p s = move
+hardPlayer :: DomsPlayer
+hardPlayer h1 db p s = move
   where
-    tactics = [cheatingTactic]
+    tactics = [firstDropTactic, score61Tactic, opponentNearTactic, 
+                hsdTactic]
     h2 = opponentPlays h1 db
     move = playerFramework (h1,h2,p,db,s) tactics
 
@@ -200,6 +218,45 @@ isJust Nothing = False
 
 resMaybe :: (Maybe a) -> a 
 resMaybe (Just x) = x
+
+seedTest :: Int
+seedTest = seed
+  where
+    games = map (\x -> (x, domsMatch mediumPlayer hsdPlayer 1000 x)) seeds
+    scores = map (\(x,(s,_)) -> (x,s)) games
+    sorted = mergesort (\(_,s1) (_,s2) -> s1 > s2) scores
+    seed:_ = map (\(x,s) -> x) sorted
+
+cheatList :: [Int]
+cheatList = [170..183]
+
+cheatingSituation :: Situation
+cheatingSituation _ = True
+
+cheatingStrategy :: Strategy
+
+cheatingStrategy (_,_,_,InitBoard,_) = ((0,183),L)
+
+cheatingStrategy (_,_,p,b,s) = move
+  where
+    score = playerScore p s
+    difference = 61 - score
+    (Board (c,d) (e,f) _) = b
+    doms = map (\x -> (x,c)) cheatList
+    scores = map (\x -> (x, scoreDom x L b)) doms
+    winners = filter (\(_,s) -> s == 61) scores
+    play:_ = map (\(x,_) -> x) winners
+    move = traceShow (show play) (play, L)
+
+cheatingTactic = (cheatingSituation, cheatingStrategy)
+
+cheatingPlayer :: DomsPlayer
+cheatingPlayer h1 db p s = move
+  where
+    tactics = [cheatingTactic]
+    h2 = opponentPlays h1 db
+    move = playerFramework (h1,h2,p,db,s) tactics
+
 
 
     
