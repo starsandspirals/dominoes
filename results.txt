@@ -1,0 +1,124 @@
+COM2001 Assignment 3
+Experimental Results
+
+These are my test results, where I test each of my players against each other
+and also against the randomPlayer and hsdPlayer, to show that adding more
+tactics makes the player better by increasing its knowledge of dominoes.
+
+Some of my tactics made the player worse and so I haven't used them; tests of
+these tactics are included below to show that the results did not improve using
+these tactics.
+
+---
+
+easyPlayer
+
+easyPlayer's only tactic is the hsdTactic which plays the highest scoring
+domino, so it beats the randomPlayer quite significantly but is mostly even
+against the hsdPlayer.
+
+*Main> domsMatch easyPlayer randomPlayer 1000 345
+(960,40)
+
+*Main> domsMatch easyPlayer randomPlayer 1000 678
+(959,41)
+
+*Main> domsMatch easyPlayer hsdPlayer 1000 345
+(491,509)
+
+*Main> domsMatch easyPlayer hsdPlayer 1000 678
+(558,442)
+
+---
+
+mediumPlayer
+
+mediumPlayer has an added tactic called score61Tactic, which means that it
+tries to reach 61 and win the game if possible, and otherwise if it has a high
+score it tries to get to 59. This improves its results relative to the
+easyPlayer.
+
+*Main> domsMatch mediumPlayer randomPlayer 1000 345
+(985,15)
+
+*Main> domsMatch mediumPlayer randomPlayer 1000 678
+(988,12)
+
+*Main> domsMatch mediumPlayer easyPlayer 1000 345
+(588,412)
+
+*Main> domsMatch mediumPlayer easyPlayer 1000 678
+(639,361)
+
+---
+
+hardPlayer
+
+hardPlayer has two additional tactics; firstDropTactic, which means that it 
+tries to play the (5,4) domino on an empty board if possible, and
+opponentNearTactic, which tries to block the opponent from getting to 61.
+These, again, improve performance relative to the mediumPlayer.
+
+*Main> domsMatch hardPlayer randomPlayer 1000 345
+(987,13)
+
+*Main> domsMatch hardPlayer randomPlayer 1000 678
+(982,18)
+
+*Main> domsMatch hardPlayer easyPlayer 1000 345
+(599,401)
+
+*Main> domsMatch hardPlayer easyPlayer 1000 678
+(638,362)
+
+*Main> domsMatch hardPlayer mediumPlayer 1000 345
+(502,498)
+
+*Main> domsMatch hardPlayer mediumPlayer 1000 678
+(546,454)
+
+---
+
+hardPlayer with dangerousTactic
+
+dangerousTactic tries to avoid playing valuable dominoes if they cannot
+be knocked off. This tactic reduces the performance of the player.
+
+*Main> domsMatch hardPlayer mediumPlayer 1000 345
+(495,505)
+
+*Main> domsMatch hardPlayer mediumPlayer 1000 678
+(533,467)
+
+---
+
+hardPlayer with majorityTactic
+
+majorityTactic tries to play dominoes containing a particular pip value when
+the hand contains the majority of that pip value. This tactic reduces the
+performance of the player.
+
+*Main> domsMatch hardPlayer mediumPlayer 1000 345
+(491,509)
+
+*Main> domsMatch hardPlayer mediumPlayer 1000 678
+(522,478)
+
+---
+
+cheatingPlayer
+
+cheatingPlayer is an extra player I wrote for fun, that probably shouldn't
+be marked. It plays whatever imaginary domino would score exactly 61 points
+in one move, ignoring the contents of its hand and the rules of dominoes,
+allowing it to win every time. :)
+
+*Main> domsMatch cheatingPlayer hardPlayer 1000 345
+(1000,0)
+
+*Main> domsMatch cheatingPlayer hardPlayer 1000 678
+(1000,0)
+
+
+
+
