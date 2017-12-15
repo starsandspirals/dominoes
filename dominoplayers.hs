@@ -1,3 +1,5 @@
+{- COM2001 Assignment 3
+   Daniel Marshall -}
 import DomsMatch
 import MergeSort
 

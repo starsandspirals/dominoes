@@ -1,5 +1,6 @@
 COM2001 Assignment 3
 Experimental Results
+Daniel Marshall
 
 These are my test results, where I test each of my players against each other
 and also against the randomPlayer and hsdPlayer, to show that adding more
